@@ -12,12 +12,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
-import java.security.Security;
 
 @AllArgsConstructor
 public class JwtTokenFilter extends GenericFilterBean {
 
-    private JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -25,15 +24,15 @@ public class JwtTokenFilter extends GenericFilterBean {
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             bearerToken = bearerToken.substring(7);
         }
-        if (bearerToken != null && tokenProvider.isValid(bearerToken)) {
+        if (bearerToken != null && jwtTokenProvider.validateToken(bearerToken)) {
             try {
-                Authentication auth = tokenProvider.getAuthentication(bearerToken);
-                if (auth != null) {
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                Authentication authentication = jwtTokenProvider.getAuthentication(bearerToken);
+                if (authentication != null) {
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (ResourceNotFoundException ignored) {
-
             }
         }
+        filterChain.doFilter(servletRequest, servletResponse);
     }
 }

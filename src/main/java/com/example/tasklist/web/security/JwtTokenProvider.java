@@ -12,6 +12,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -89,7 +90,7 @@ public class JwtTokenProvider {
             final String refreshToken
     ) {
         JwtResponse jwtResponse = new JwtResponse();
-        if (!isValid(refreshToken)) {
+        if (!validateToken(refreshToken)) {
             throw new AccessDeniedException();
         }
         Long userId = Long.valueOf(getId(refreshToken));
@@ -105,7 +106,7 @@ public class JwtTokenProvider {
         return jwtResponse;
     }
 
-    public boolean isValid(
+    public boolean validateToken(
             final String token
     ) {
         Jws<Claims> claims = Jwts
